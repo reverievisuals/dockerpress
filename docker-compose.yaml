@@ -2,43 +2,49 @@ version: '3.9'
 
 services:
   # Database
-  db:
-    image: mariadb:latest
-    volumes:
-      - db_data:/var/lib/mysql
+  mysql:
+    image: mariadb:${MYSQL_TAG}
+    container_name: ${APP_NAME}-mysql
     restart: always
+    ports:
+      - '3306:3306'
+    command: --lower_case_table_names=2
+    volumes:
+      - ./data/db:/var/lib/mysql:delegated
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wordpress
-      MYSQL_PASSWORD: wordpress
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
   # phpMyAdmin
-  phpmyadmin:
-    depends_on:
-    - db
-    image: phpmyadmin:latest
+  pma:
+    image: phpmyadmin:${PMA_TAG}
+    container_name: ${APP_NAME}-phpmyadmin
     restart: always
     ports:
       - "8080:80"
+    volumes:
+      - ./config/phpmyadmin.ini:/usr/local/etc/php/conf.d/phpmyadmin.ini
     environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: password
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    depends_on:
+    - mysql
   # Wordpress
   wordpress:
-    depends_on:
-      - db
-    image: wordpress:latest
+    image: wordpress:${WP_TAG}
+    container_name: ${APP_NAME}-wordpress
+    restart: always
     ports:
       - "8000:80"
-    restart: always
-    environment:
-      WORDPRESS_DB_HOST: db:3306
-      WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
-    working_dir: /var/www/html
+    # working_dir: /var/www/html
     volumes:
       - ./wp-content:/var/www/html/wp-content
-      - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
-volumes:
-  db_data:
-
+      - ./config/php.ini:/usr/local/etc/php/conf.d/php.ini
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - mysql
