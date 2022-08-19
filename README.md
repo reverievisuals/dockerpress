@@ -7,6 +7,7 @@ Setup WordPress locally for theme development with Docker.
 - WordPress (5.9.3)
 - MariaDB (latest)
 - PhpMyAdmin (latest)
+- MailHog (latest)
 - Core update and auto update are disabled by default.
 
 ## Requirements
@@ -73,5 +74,10 @@ To access PhpMyAdmin:
 http://localhost:8080/
 ```
 
+To access MailHog:
+
+```sh
+http://localhost:8025/
+```
 </p>
 </details>
