@@ -1,0 +1,78 @@
+version: '3.9'
+services:
+
+  # Database
+  mysql:
+    image: mariadb:latest
+    container_name: ${APP_NAME}-mysql
+    restart: always
+    ports:
+      - '3306:3306'
+    networks:
+      - backend
+    command: --lower_case_table_names=2
+    volumes:
+      - ./db-data:/var/lib/mysql:delegated
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+
+  # phpMyAdmin
+  pma:
+    image: phpmyadmin:latest
+    container_name: ${APP_NAME}-phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    networks:
+      - backend
+      - frontend
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    depends_on:
+      - mysql
+
+  # Wordpress
+  wordpress:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${APP_NAME}-wordpress
+    restart: always
+    ports:
+      - "8000:80"
+    networks:
+      - backend
+      - frontend
+    volumes:
+      - ./wp-content:/var/www/html/wp-content:rw,cached
+      - ./config/php.ini:/usr/local/etc/php/conf.d/php.ini
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_NAME: ${DB_NAME}
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_CONFIG_EXTRA: |
+        // Update settings
+        // Disable all core updates
+        define( 'WP_AUTO_UPDATE_CORE', false );
+        // Disable auto updates
+        define( 'AUTOMATIC_UPDATER_DISABLED', true );
+        # // Multisite
+        # define( 'WP_ALLOW_MULTISITE', true );
+        # define( 'MULTISITE', true );
+        # define( 'SUBDOMAIN_INSTALL', false );
+        # // TODO: change to actual domain when deploying
+        # define( 'DOMAIN_CURRENT_SITE', 'localhost' );
+        # define( 'PATH_CURRENT_SITE', '/' );
+        # define( 'SITE_ID_CURRENT_SITE', 1 );
+        # define( 'BLOG_ID_CURRENT_SITE', 1 );
+    depends_on:
+      - mysql
+
+networks:
+  backend:
+  frontend:
