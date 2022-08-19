@@ -51,6 +51,10 @@ services:
       - ./wp-content:/var/www/html/wp-content:rw,cached
       - ./config/php.ini:/usr/local/etc/php/conf.d/php.ini
     environment:
+      SMTP_HOSTNAME: mailhog
+      SMTP_PORT: "1025"
+      SMTP_FROM: no-reply@mailhog.lo
+      SMTP_FROM_NAME: MailHog
       WORDPRESS_DB_HOST: mysql:3306
       WORDPRESS_DB_NAME: ${DB_NAME}
       WORDPRESS_DB_USER: ${DB_USER}
@@ -70,8 +74,52 @@ services:
         # define( 'PATH_CURRENT_SITE', '/' );
         # define( 'SITE_ID_CURRENT_SITE', 1 );
         # define( 'BLOG_ID_CURRENT_SITE', 1 );
+        // SMTP Settings
+        require_once( ABSPATH .'wp-includes/plugin.php' );
+        add_action( 'phpmailer_init', 'mail_smtp' );
+        function mail_smtp( $$phpmailer ) {
+          $$phpmailer->isSMTP();
+          $$phpmailer->Host = getenv('SMTP_HOSTNAME');
+          $$phpmailer->Port = getenv('SMTP_PORT');
+          $$phpmailer->From = getenv('SMTP_FROM');
+          $$phpmailer->FromName = getenv('SMTP_FROM_NAME');
+
+          // Filter out client message body and output debug info to the logs
+          // NOTE: Log level must be set to '2' or higher in order for the filter to work
+          $$phpmailer->SMTPDebug = 2;
+
+          $$phpmailer->Debugoutput = function($$str) {
+            static $$logging = true;
+            if ($$logging === false && strpos($$str, 'SERVER -> CLIENT') !== false) {
+              $$logging = true;
+            }
+            if ($$logging) {
+              error_log("SMTP " . "$$str");
+            }
+            if (strpos($$str, 'SERVER -> CLIENT: 354') !== false) {
+              $$logging = false;
+            }
+          };
+        }
+        // Prevent Wordpress from overriding the SMTP FROM address (Office 365 compatibility)
+        add_filter( 'wp_mail_from', function( $$email ) {
+            return $$_ENV["SMTP_FROM"];
+        });
     depends_on:
       - mysql
+  # MailHog
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: myapp-mailhog
+    restart: always
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
+    networks:
+      - backend
+      - frontend
+    logging:
+      driver: 'none' # Disable saving logs
 
 networks:
   backend:
