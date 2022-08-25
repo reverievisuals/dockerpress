@@ -81,3 +81,6 @@ http://localhost:8025/
 ```
 </p>
 </details>
+
+## License
+[MIT](/LICENSE)
