@@ -1,3 +1,5 @@
+![Banner](/assets/banner.png?raw=true "Banner")
+
 # DockerPress
 
 Setup WordPress locally for theme development with Docker.
