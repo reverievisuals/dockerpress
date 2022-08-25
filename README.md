@@ -1,4 +1,4 @@
-# docker-wordpress
+# DockerPress
 
 Setup WordPress locally for theme development with Docker.
 
@@ -26,13 +26,13 @@ With Docker installed and running:
 ### Clone the repo
 
 ````sh
-git clone https://github.com/reverievisuals/docker-wordpress.git
-cd docker-wordpress
+git clone https://github.com/reverievisuals/dockerpress.git
+cd dockerpress
 ````
 
 ### Select WordPress branch
 
-You can also switch to a different WordPress branch.
+To use a different WordPress branch.
 
 For example WordPress 5.8 branch:
 
