@@ -1,5 +1,7 @@
 ![Banner](/assets/banner.png?raw=true "Banner")
 
+[![License](https://img.shields.io/badge/License-MIT-blue)](#license)
+
 # DockerPress
 
 Setup WordPress locally for theme development with Docker.
