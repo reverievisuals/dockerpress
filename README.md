@@ -4,13 +4,13 @@
 
 Setup WordPress locally for theme development with Docker.
 
-## Features
+## Contents
 
 - WordPress (5.8.4)
-- MariaDB (latest)
-- PhpMyAdmin (latest)
-- MailHog (latest)
 - Core update and auto update are disabled by default.
+- [MariaDB](https://mariadb.org/) - Open source relational database.
+- [MailHog](https://github.com/mailhog/MailHog) - An email testing tool for developers. Configure your outgoing SMTP server and view your outgoing email in a web UI.
+- [PhpMyAdmin](https://www.phpmyadmin.net/) - free and open source administration tool for MySQL and MariaDB.
 
 ## Requirements
 
